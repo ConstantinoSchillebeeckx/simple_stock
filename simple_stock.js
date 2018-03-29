@@ -8,8 +8,8 @@ function renderChart(div, data) {
         data: (list) data to render, see https://github.com/nvd3-community/nvd3/blob/gh-pages/examples/candlestickChart.html for example format
     */
 
-    nv.addGraph(function() {
 
+    nv.addGraph(function() {
         // this chart options are specific to the line chart
         if ('useInteractiveGuideline' in chart) {
             chart.useInteractiveGuideline(true);
@@ -24,10 +24,11 @@ function renderChart(div, data) {
                  })
         }
 
-        chart.margin({
-            left:80,
-            right:50,
-        })
+        chart
+             .margin({
+                left:80,
+                right:50,
+             })
 
         chart.x(function(d) {
             return dateToTimestamp(d.date);
@@ -97,42 +98,50 @@ function parseGetParams() {
     var items = location.search.substr(1).split("&");
     for (var index = 0; index < items.length; index++) {
         tmp = items[index].split("=");
-        result[tmp[0]] = tmp[1].split(',');
+        if (tmp.length == 2) result[tmp[0]] = tmp[1].split(',');
     }
     return result;
 }
 
+function buildURL(GET) {
+    /*
+    Build the proper IEX endpoint to download our data
 
-function init(div, chartType) {
+    GET: (obj) {symbols: ['AAPL','FB'], range: '1y'}
+    
+    // REF: https://iextrading.com/developer/docs/#batch-requests
+    */
+    var base = 'https://api.iextrading.com/1.0/stock/';
+    var tickers = 'symbols' in GET ? GET['symbols'] : 'aapl,fb';
+    var endpoint = 'market/batch/?symbols=';
+    var options = '&types=chart';
+    options += '&range=' + ('range' in GET ? GET['range'][0] : '1m');
+    
+    return base + endpoint + tickers + options;
+}
+
+
+function init(div) {
     /*
         Function call to query data from IEX and render chosen chart type
 
         div: (str) selector for chart div e.g. '#chart'
         chartType: (str) 'line' or 'candle'
     */
+    var GET = parseGetParams();
 
-    if (chartType === 'candle') {
-        chart = nv.models.candlestickBarChart();
-    } else if (typeof chartType === 'undefined' || chartType === 'line') {
+    if ('chartType' in GET) {
+        if (GET['chartType'][0] === 'candle') {
+            chart = nv.models.candlestickBarChart();
+        } else {
+            chart = nv.models.lineWithFocusChart();
+        }
+    } else {
         chart = nv.models.lineWithFocusChart();
     }
 
 
-    // parse GET parameters into a proper GET call
-    // currently supported parameters:
-    // - symbols
-    // - range
-    // REF: https://iextrading.com/developer/docs/#batch-requests
-    var GET = parseGetParams();
-    var base = 'https://api.iextrading.com/1.0/stock/';
-    var tickers = 'symbols' in GET ? GET['symbols'] : 'aapl,fb';
-    var endpoint = 'market/batch/?symbols=';
-    var options = '&types=chart';
-    options += '&range=' + ('range' in GET ? GET['range'] : '1m');
-    
-    var url = base + endpoint + tickers + options;
-
-    getData(url, function(d) {
+    getData(buildURL(GET), function(d) {
 
         var dat = Object.keys(d).map(function(i) {
             return {
