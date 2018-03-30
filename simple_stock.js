@@ -24,7 +24,7 @@ function renderChart(div, data) {
                  })
         }
 
-        chart
+        chart.color(d3.scale.category10().range())
              .margin({
                 left:80,
                 right:50,
@@ -117,7 +117,10 @@ function buildURL(GET) {
     var options = '&types=chart';
     options += '&range=' + ('range' in GET ? GET['range'][0] : '1m');
     
-    return base + endpoint + tickers + options;
+    var url = base + endpoint + tickers + options;
+    console.log("IEX endpoint: " + url);
+
+    return url;
 }
 
 
@@ -140,7 +143,6 @@ function init(div) {
         chart = nv.models.lineWithFocusChart();
     }
 
-
     getData(buildURL(GET), function(d) {
 
         var dat = Object.keys(d).map(function(i) {
@@ -150,6 +152,7 @@ function init(div) {
                 values: d[i].chart,
             };
         });
+
 
         renderChart(div, dat);
     })
