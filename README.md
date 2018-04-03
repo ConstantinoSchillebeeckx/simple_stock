@@ -4,7 +4,7 @@ A bare-bones stock chart that leverages [NVD3](https://nvd3-community.github.io/
 
 ### Usage
 
-  The data and time range to be displayed are set through *GET* parameters; for example, to display the last month of GOOG as a line chart you do something like [this](?symbols=GOOG&range=1m&chartType=line).
+  The data and time range to be displayed are set through *GET* parameters; for example, to display the last month of GOOG as a line chart you do something like [this](https://constantinoschillebeeckx.github.io/simple_stock/?symbols=GOOG&range=1m&chartType=line).
 
   The following *GET* parameters are available:
 
